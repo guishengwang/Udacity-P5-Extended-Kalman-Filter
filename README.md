@@ -1,5 +1,15 @@
-# Extended Kalman Filter Project Starter Code
-Self-Driving Car Engineer Nanodegree Program
+#  **Extended Kalman Filter** 
+## Udacity Self-Driving Car Nanodegree Project 5
+
+**The goals / steps of this project are the following:**
+
+* Establish communication between c++ program and simulator via uWebSocketIO
+* Obtain lidar and radar measurement data on a moving object and true ground value from simulator
+* Utilize a kalman and extended kalman filter to estimate the state (position and velocity)
+* Calucalate and ensure RMSE value lower than the tolerance outlined in the project rubric.
+* Send RMSE values to simulator
+
+
 
 In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
 
@@ -130,5 +140,5 @@ Regardless of the IDE used, every submitted project must
 still be compilable with cmake and make.
 
 ## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+
 
