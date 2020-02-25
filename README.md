@@ -4,141 +4,115 @@
 **The goals / steps of this project are the following:**
 
 * Establish communication between c++ program and simulator via uWebSocketIO
-* Obtain lidar and radar measurement data on a moving object and true ground value from simulator
+* Obtain lidar and radar measurement data on a bicycle and true ground value from simulator
 * Utilize a kalman and extended kalman filter to estimate the state (position and velocity)
-* Calucalate and ensure RMSE value lower than the tolerance outlined in the project rubric.
+* Calculate and ensure RMSE value not greater than the tolerance( [.11, .11, 0.52, 0.52] ) outlined in the project rubric.
 * Send RMSE values to simulator
 
+[//]: # (Image References)
+
+[image1]: ./examples/placeholder.png "Model Visualization"
+[image2]: ./examples/placeholder.png "Grayscaling"
+[image3]: ./examples/placeholder_small.png "Recovery Image"
 
 
-In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
+### Environment and File Submitted
 
-This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases).
+#### 1. Environment set up
 
-This repository includes two files that can be used to set up and install [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) for either Linux or Mac systems. For windows you can use either Docker, VMware, or even [Windows 10 Bash on Ubuntu](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/) to install uWebSocketIO. Please see the uWebSocketIO Starter Guide page in the classroom within the EKF Project lesson for the required version and installation scripts.
-
-Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.
-
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make
-5. ./ExtendedKF
-
-Tips for setting up your environment can be found in the classroom lesson for this project.
-
-Note that the programs that need to be written to accomplish the project are src/FusionEKF.cpp, src/FusionEKF.h, kalman_filter.cpp, kalman_filter.h, tools.cpp, and tools.h
-
-The program main.cpp has already been filled out, but feel free to modify it.
-
-Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
+* Download simulator from Udacity's repo on Github to local drive
+* Install Windows Subsystem for Linux - WSL
+* Install Ubuntu and set up username and password
+* Follow the instruction of "Environment Setup (Linux)" to do followings:
+ * install git
+ * install cmake
+ * install openssl 
+ * install libssl-dev
+ * clone project from Udacity's repo on Github
+ * install uWebSocketIO
 
 
-**INPUT**: values provided by the simulator to the c++ program
+#### 2. Files submitted below:
 
-["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
+File Name | Description
+----------|-----------
+FusionEKF.cpp | initialzation and fusion the kalman filter result of laser and radar sensor 
+kalman_filter.cpp |prediction, update  function of kalman filter and extended kalmna filter
+tools.cpp | calcaute RMSE and Jacobian Matrix
+writeup_report.md | summary of the project and the same contents as README.MD
 
 
-**OUTPUT**: values provided by the c++ program to the simulator
 
-["estimate_x"] <= kalman filter estimated position x
+### Coding Process
 
-["estimate_y"] <= kalman filter estimated position y
+There are only 3 cpp files below need to be finished. 
+* FusionEKF.cpp
+* kalman_filter.cpp
+* tools.cpp
 
-["rmse_x"]
+#### FusionEKF.cpp:
 
-["rmse_y"]
+The main.cpp receives the following values from the simulator and passes these data in "meas_package" to FusionEKF.cpp
+* Lidar measurement: x,y
+* Radar measurement: rho, phi, rhodot
+* Groundtruth: x, y, vx, vy
+* Time: timestamp
 
-["rmse_vx"]
+The code need to do initialziation the first time it was called
 
-["rmse_vy"]
+Variable | Description
+----------|-----------
+R_laser_ |measurement covariance matrix - LIDAR 
+R_radar_ |measurement covariance matrix - RADAR
+H_laser_ | Measurement matrix - LIDAR
+Hj_  | Measurement matrix - RADAR
+ekf_.F_|Initial transition matrix F_
+ekf_.P_|State covariance matrix P
 
----
+Then predicts for both Lidar and Radar sensor, 
+* set the state transitional matrix F
+* set the process covariance matrix Q
+* call predict fuctnion in kalman_filter.cpp
 
-## Other Important Dependencies
+Then updates for Radar sensor
+* call function in tools.cpp to get the Jacobian Matrix
+* call udpateEKF fuction in kalman_filter.cpp to update state and P matrix
 
-* cmake >= 3.5
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1 (Linux, Mac), 3.81 (Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
+Or udpates for Lidar sensor
+* call udpate fucntion on kalman_filter.cpp to udpate state and P matrix
 
-## Basic Build Instructions
+At last the main.cpp will get RMSE from tools.cpp and passes following values to the simulator
+* kalman filter estimated position x, y
+* RMSE x,y,vx,vy
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make` 
-   * On windows, you may need to run: `cmake .. -G "Unix Makefiles" && make`
-4. Run it: `./ExtendedKF `
 
-## Editor Settings
+#### kalman_filter.cpp
+There are three functions as below need to be updated:
+* KalmanFilter Predict function for both Lidar and Radar
+* KalmanFilter Update function for Lidar 
+* Extended KalmanFilter Update function for Radar
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+#### tools.cpp
+There are two functions as below need to be updated:
+* Calculate RMSE for main.cpp
+* Calculate Jacobian Matrix ( Measurement matrix - RADAR ) for FusionEKF.cpp
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
 
-## Code Style
+##  Compile, Build and Run 
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+* Make a build directory: `mkdir build && cd build`
+* Compile: `cmake .. && make` 
+* Run it: `./ExtendedKF ` and the command line will show "Listening to port 4567"
+* Run simulator, click "play" button , select " Project 1/2: EKF and UKF " and bash command line will show "Connected!!!".
+* Choose Dataset 1 and click "Start" Button to start and the simulator will show the RMSE data from FusionEKF code.
 
-## Generating Additional Data
 
-This is optional!
 
-If you'd like to generate your own radar and lidar data, see the
-[utilities repo](https://github.com/udacity/CarND-Mercedes-SF-Utilities) for
-Matlab scripts that can generate additional data.
 
-## Project Instructions and Rubric
+## Discussion
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+The challenge to me for this project was to set up the Linux environment and to understand the process flow. Fortunately the instruction from the class were very clear and with the help from my mentor, I successfuly set up the environment of WSL, Ubuntu and cmake. Thought this step took me many hours but it was great oppotunity to get familar with these environments.  
 
-More information is only accessible by people who are already enrolled in Term 2 (three-term version) or Term 1 (two-term version)
-of CarND. If you are enrolled, see the Project Resources page in the classroom
-for instructions and the project rubric.
-
-## Hints and Tips!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-* Students have reported rapid expansion of log files when using the term 2 simulator.  This appears to be associated with not being connected to uWebSockets.  If this does occur,  please make sure you are conneted to uWebSockets. The following workaround may also be effective at preventing large log files.
-
-    + create an empty log file
-    + remove write permissions so that the simulator can't write to log
- * Please note that the ```Eigen``` library does not initialize ```VectorXd``` or ```MatrixXd``` objects with zeros upon creation.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
-
-However! We'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Regardless of the IDE used, every submitted project must
-still be compilable with cmake and make.
-
-## How to write a README
+Then the next challenge was to understand the process flow among main.cpp, FusionEKF.cpp,kalman_filter.cpp and tools.cpp. There are sample code from class on kalman filter predict and update, extended kalman filter update fuction, RMSE and Jacobian calucation which was very helpful. The FusionEKF.cpp was the most difficult part for me andI have to read the class material back and forth to dive deeper. While the whole process have lots of pain and fun. Looking forward to the next challenge! 
 
 
